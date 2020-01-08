@@ -93,7 +93,7 @@ app.post('/api/parking', (req, res) => {
   Parking.create({
     spot: {
       coordinate: [longitude, latitude],
-      available_time: new Date(Date.UTC(96, 1, 2, 3, 4, 5)).toUTCString(),
+      // available_time: new Date(Date.now()).toUTCString(),
       user_id: user_id
     }
   })

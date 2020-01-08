@@ -66,7 +66,8 @@ const MapComponent = () => {
         pinLocations.forEach((location) => {
           const latitude = location.spot.coordinate[1];
           const longitude = location.spot.coordinate[0];
-          setMarkers(markers => [...markers, { latitude, longitude }]);
+          const available_time = location.spot.available_time;
+          setMarkers(markers => [...markers, { latitude, longitude, available_time }]);
         })
       })
   }, 1000)
@@ -105,7 +106,7 @@ const MapComponent = () => {
       setShouldAddPin(shouldAddPin => !shouldAddPin);
 
       let utcDate = new Date(new Date().toUTCString());
-      let utcDateAdd10Min = new Date(utcDate.getTime() + 10 * 60000);
+      let utcDateAdd10Min = new Date(utcDate.getTime());
       setTime(time => {
         return utcDateAdd10Min.toLocaleTimeString('en-US'); // this will set time to be the current time + 10 minutes, format example: 5:20:08 PM
       });
@@ -205,7 +206,7 @@ const MapComponent = () => {
               <button className="marker-btn" onClick={(e) => {
                 e.preventDefault();
                 console.log('clicked: ', park);
-                setSelectedPark(park); // when the map pin button is clicked, we will set the state of selectedPark to be the current park the user clicked
+                setSelectedPark(park); // when the map pin button is clicked, we will set the state of selectedPark to be the current
               }}>
                 <img src={marker} style={{ backgroundColor: 'transparent' }} width="15" height="20" />
               </button>
@@ -221,8 +222,12 @@ const MapComponent = () => {
               }}
             >
               <div style={{ textAlign: 'left', width: '250px', height: '100px' }}>
-                Who parked here: {selectedPark.user_name || user.name}<br />
-                Available today at: {time}<br />
+                {/* Who parked here: {selectedPark.user_name || user.name}<br >*/}
+                {/*Available today at: {time}<br />*/}
+                {/*Parking coordinates: {selectedPark.latitude}, {selectedPark.longitude}*/}
+                {/* Who parked here: {selectedPark.user_name || user.name}<br >*/}
+                Available today at: {selectedPark.available_time}<br />
+                {console.log('selectedPark', selectedPark)}
                 Parking coordinates: {selectedPark.latitude}, {selectedPark.longitude}
               </div>
             </Popup>
@@ -238,4 +243,3 @@ const MapComponent = () => {
 };
 
 export default MapComponent;
-
