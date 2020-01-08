@@ -5,7 +5,9 @@ const cookieController = {
         User.find({name: res.locals.user.name})
         .exec()
         .then(user => {
-            res.cookie('ssid', user[0]._id, {httpOnly: true});
+            const cookie = user[0]._id;
+            const newCookie = cookie.toString();
+            res.cookie('ssid', newCookie, {httpOnly: true});
             res.locals.userId = user[0]._id;
             return next();
         })
