@@ -67,7 +67,9 @@ const MapComponent = () => {
           const latitude = location.spot.coordinate[1];
           const longitude = location.spot.coordinate[0];
           const available_time = location.spot.available_time;
-          setMarkers(markers => [...markers, { latitude, longitude, available_time }]);
+          const username = location.spot.username;
+          // const username = location.spot.user_name;
+          setMarkers(markers => [...markers, { latitude, longitude, available_time, username }]);
         })
       })
   }, 1000)
@@ -182,10 +184,10 @@ const MapComponent = () => {
               key={i}
               latitude={park.latitude}
               longitude={park.longitude}
-            // draggable={true}
+              draggable={true}
             // onDragStart={onMarkerDragStart}
             // onDrag={onMarkerDrag}
-            // onDragEnd={onMarkerDragEnd}
+              onDragEnd={onMarkerDragEnd}
             >
               <button className="marker-btn" onClick={(e) => {
                 e.preventDefault();
@@ -225,7 +227,7 @@ const MapComponent = () => {
                 {/* Who parked here: {selectedPark.user_name || user.name}<br >*/}
                 {/*Available today at: {time}<br />*/}
                 {/*Parking coordinates: {selectedPark.latitude}, {selectedPark.longitude}*/}
-                {/* Who parked here: {selectedPark.user_name || user.name}<br >*/}
+                Who parked here: {selectedPark.username || user.name}<br />
                 Available today at: {selectedPark.available_time}<br />
                 {console.log('selectedPark', selectedPark)}
                 Parking coordinates: {selectedPark.latitude}, {selectedPark.longitude}
