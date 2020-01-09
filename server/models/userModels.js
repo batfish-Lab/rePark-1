@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 
 //set schema for user
 const userSchema = new Schema({
-  name: { type: String, required: true, unique: true },
+  name: { type: String, required: true },
   phone: { type: Number, required: true, unique: true },
   pass: { type: String, required: true },
   car: {
@@ -24,7 +24,8 @@ const parkingSchema = new Schema({
     user_id: {
       type: Schema.Types.ObjectId,
       ref: 'user'
-    }
+    },
+    username: String,
   }
 });
 

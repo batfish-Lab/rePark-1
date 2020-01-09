@@ -7,7 +7,7 @@ const sessionController = require('../controllers/sessionController');
 const cookieController = require('../controllers/cookieController');
 
 
-router.post('/', userController.verifyUser,
+router.post('/', userController.verifyUser, cookieController.setSSIDCookie,
   (req, res) => {
     res.status(200).json({ id: res.locals.id, auth: res.locals.auth })
   });

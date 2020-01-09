@@ -42,9 +42,9 @@ app.use('/assets', express.static(path.join(__dirname, './assets')));
 // if production
 if (process.env.NODE_ENV === 'production') {
   // statically serve everything in the build folder on the route '/build'
-  app.use('/build', express.static(path.join(__dirname, '../build')));
+  app.use('/build', express.static(path.resolve(__dirname, '../build')));
   // serve index.html on the route '/'
-  app.get('/*', (req, res) => {
+  app.get('/', (req, res) => {
     res.sendFile(path.resolve(__dirname, '../client/index.html'));
   });
 }
@@ -89,13 +89,18 @@ app.get('/index', sessionController.isLoggedIn,
 app.post('/api/parking', (req, res) => {
   const { longitude, latitude } = req.body;
   const user_id = req.cookies.ssid;
+  console.log('user_id', user_id);
 
-  Parking.create({
-    spot: {
-      coordinate: [longitude, latitude],
-      available_time: new Date(Date.UTC(96, 1, 2, 3, 4, 5)).toUTCString(),
-      user_id: user_id
-    }
+  User.findById(user_id, function(err, doc) {
+    console.log('user', doc);
+    Parking.create({
+      spot: {
+        coordinate: [longitude, latitude],
+        // available_time: new Date(Date.now()).toUTCString(),
+        user_id: req.cookies.ssid,
+        username: doc.name,
+      }
+    })
   })
 });
 
