@@ -2,7 +2,7 @@ const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
-const { User, Parking } = require('./models/userModels');
+const { User, Parking, CountDown } = require('./models/userModels');
 
 //importing routers
 const login = require('./router/loginRouter.js');
@@ -57,6 +57,15 @@ app.get('/api/parking', (req, res) => {
       res.status(200).json(docs)
     });
 })
+
+app.get('/api/countdown', (req, res) => {
+  CountDown.find({})
+    .exec()
+    .then((docs) => {
+      // console.log('docs:', docs)
+      res.status(200).json(docs)
+    });
+})
 /**
  * root
  */
@@ -94,6 +103,23 @@ app.post('/api/parking', (req, res) => {
   User.findById(user_id, function(err, doc) {
     console.log('user', doc);
     Parking.create({
+      spot: {
+        coordinate: [longitude, latitude],
+        // available_time: new Date(Date.now()).toUTCString(),
+        user_id: req.cookies.ssid,
+        username: doc.name,
+      }
+    })
+  })
+});
+
+app.post('/api/countdown', (req, res) => {
+  const { longitude, latitude } = req.body;
+  const user_id = req.cookies.ssid;
+
+  User.findById(user_id, function(err, doc) {
+    console.log('countdown', doc);
+    CountDown.create({
       spot: {
         coordinate: [longitude, latitude],
         // available_time: new Date(Date.now()).toUTCString(),
