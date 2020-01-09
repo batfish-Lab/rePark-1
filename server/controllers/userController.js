@@ -20,7 +20,7 @@ const userController = {
       })
       .catch(err => {
         return next({
-          log: 'Express error handler caught user create error',
+          log: `Express error handler caught user create error ${err}`,
           status: 400,
           message: { err: 'An error occurred' },
         });
@@ -40,6 +40,7 @@ const userController = {
         if (userDoc.pass === req.body.pass) {
           res.locals.auth = true;
           res.locals.id = userDoc._id;
+          res.locals.user = userDoc;
           return next();
         }
         res.locals.auth = false;

@@ -1,13 +1,12 @@
 const { User } = require('../models/userModels');
 const cookieController = {
-    
+
     setSSIDCookie (req, res, next) {
         User.find({name: res.locals.user.name})
         .exec()
         .then(user => {
-            const cookie = user[0]._id;
-            const newCookie = cookie.toString();
-            res.cookie('ssid', newCookie, {httpOnly: true});
+            console.log('cookie being set');
+            res.cookie('ssid', user[0]._id, {httpOnly: true, overwrite: true});
             res.locals.userId = user[0]._id;
             return next();
         })
