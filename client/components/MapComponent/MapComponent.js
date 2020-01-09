@@ -155,6 +155,27 @@ const MapComponent = () => {
         }),
         headers: { 'content-type': 'application/json', 'Accept': 'application/json' }
       });
+
+      const addMinToDate = (date, min) => {
+        return new Date(date.getTime() + min * 60000)
+      }
+      const currentTime = new Date()
+      const add5Min = addMinToDate(currentTime, 1)
+      
+      const setTimeExpire = setInterval(function() {
+        const now = new Date().getTime();
+        let time = add5Min - now;
+        const days = Math.floor(time / (1000 * 60 * 60 * 24)); 
+        const hours = Math.floor((time %(1000 * 60 * 60 * 24))/(1000 * 60 * 60)); 
+        const minutes = Math.floor((time % (1000 * 60 * 60)) / (1000 * 60)); 
+        const seconds = Math.floor((time % (1000 * 60)) / 1000); 
+        document.getElementById("timer").innerHTML = days + "d "  
+        + hours + "h " + minutes + "m " + seconds + "s "; 
+        if (time < 0) { 
+            clearInterval(setTimeExpire); 
+            document.createElement("timer").innerHTML('TIME EXPIRED')
+        } 
+      }, 1000);
     }
     if (target.className !== 'mapboxgl-ctrl-geocoder--input' && shouldAddPark) { // as long as the user is not clicking in the search box
       // console.log(`clicked, longitude: ${longitude}, latitude: ${latitude}`);
@@ -243,7 +264,8 @@ const MapComponent = () => {
   //     </button>
   //   </Marker>)
   //   }
-  // }
+  
+
 
   return (
     <div style={{ margin: '-2vw', textAlign: 'left' }}>
@@ -348,6 +370,7 @@ const MapComponent = () => {
                 Available today at: {selectedPark.available_time}<br />
                 {console.log('selectedPark', selectedPark)}
                 Parking coordinates: {selectedPark.latitude}, {selectedPark.longitude}
+                <div id='timer'></div>
               </div>
             </Popup>
           ) : null}

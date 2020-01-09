@@ -20,7 +20,7 @@ const User = mongoose.model('User', userSchema);
 const parkingSchema = new Schema({
   spot: {
     coordinate: { type: [Number, Number], required: true },
-    available_time: { type: Date, expires: 120, default: Date.now },
+    available_time: { type: Date, expires: 180, default: Date.now },
     user_id: {
       type: Schema.Types.ObjectId,
       ref: 'user'
