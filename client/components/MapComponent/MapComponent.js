@@ -61,14 +61,14 @@ const MapComponent = () => {
   
   //to retrieve other pins
   useInterval(() => {
-    setMarkers(markers => [])
+    // setMarkers(markers => [])
     fetch('/api/parking', {
       method: 'GET',
     })
       .then((res) => res.json())
       .then((pinLocations) => {
         console.log(pinLocations)
-        // setMarkers(markers => [])
+        setMarkers(markers => [])
         pinLocations.forEach((location) => {
           const latitude = location.spot.coordinate[1];
           const longitude = location.spot.coordinate[0];
@@ -78,7 +78,7 @@ const MapComponent = () => {
           setMarkers(markers => [...markers, { latitude, longitude, available_time, username }]);
         })
       })
-      setMarkers(markers => [])
+      // setMarkers(markers => [])
   }, 5000)
 
     //to retrieve other pins
@@ -90,7 +90,7 @@ const MapComponent = () => {
           .then(res => res.json())
           .then((pinLocations) => {
             console.log(pinLocations)
-            // setMarkers(markers => [])
+            setMarkers2(markers2 => [])
             pinLocations.forEach((location) => {
               const latitude = location.spot.coordinate[1];
               const longitude = location.spot.coordinate[0];
@@ -101,7 +101,7 @@ const MapComponent = () => {
             })
             
           })
-          setMarkers2(markers2 => [])
+          // setMarkers2(markers2 => [])
     }, 5000)
   
   // setInterval(() => {
