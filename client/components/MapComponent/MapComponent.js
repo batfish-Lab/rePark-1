@@ -2,12 +2,12 @@ import React, { useState, useEffect, useContext, useRef } from 'react'; // using
 import ReactMapGL, { Marker, Popup, GeolocateControl } from 'react-map-gl'; // using mapbox api
 import Geocoder from 'react-map-gl-geocoder'; // coverts user inputted address into coordinates
 import marker from './marker.png'; // image of map pin. Will need to find one with transparent background
+import marker2 from './marker2.png'; 
 import { UserContext } from '../../../client/contexts/UserContext.js';
 import './map.css';
 
 // hardcoded 2 locations as pins. Will have to replace this with MongoDB Parking data
-const mongoParkingSpots = [{ latitude: 33.985673, longitude: -118.455888, user_ID: 10000, user_name: 'Catherine', wait_time: '10' },
-{ latitude: 33.982185, longitude: -118.438087, user_ID: 10001, user_name: 'Amruth', wait_time: '15' }];
+const mongoParkingSpots = [];
 
 const MapComponent = () => {
   function useInterval(callback, delay) {
@@ -42,6 +42,8 @@ const MapComponent = () => {
   const [selectedPark, setSelectedPark] = useState(null);
 
   const [markers, setMarkers] = React.useState([]);
+
+  const [markers2, setMarkers2] = React.useState([]);
   // this method will make the map pin popup go away when escape key is pressed
   useEffect(() => {
     const listener = e => {
@@ -55,14 +57,18 @@ const MapComponent = () => {
     }
   }, []);
 
+
+  
   //to retrieve other pins
   useInterval(() => {
+    // setMarkers(markers => [])
     fetch('/api/parking', {
       method: 'GET',
     })
       .then((res) => res.json())
       .then((pinLocations) => {
         console.log(pinLocations)
+        setMarkers(markers => [])
         pinLocations.forEach((location) => {
           const latitude = location.spot.coordinate[1];
           const longitude = location.spot.coordinate[0];
@@ -72,8 +78,32 @@ const MapComponent = () => {
           setMarkers(markers => [...markers, { latitude, longitude, available_time, username }]);
         })
       })
-  }, 1000)
+      // setMarkers(markers => [])
+  }, 5000)
 
+    //to retrieve other pins
+    useInterval(() => {
+        fetch('/api/countdown', {
+          method: 'GET',
+        })
+        .then(console.log('and then'))
+          .then(res => res.json())
+          .then((pinLocations) => {
+            console.log(pinLocations)
+            setMarkers2(markers2 => [])
+            pinLocations.forEach((location) => {
+              const latitude = location.spot.coordinate[1];
+              const longitude = location.spot.coordinate[0];
+              const available_time = location.spot.available_time;
+              const username = location.spot.username;
+              // const username = location.spot.user_name;
+              setMarkers2(markers2 => [...markers2, { latitude, longitude, available_time, username }]);
+            })
+            
+          })
+          // setMarkers2(markers2 => [])
+    }, 5000)
+  
   // setInterval(() => {
 
   // }, 2000)
@@ -94,12 +124,14 @@ const MapComponent = () => {
 
   const [shouldAddPin, setShouldAddPin] = React.useState(false);
 
+  const [shouldAddPark, setShouldAddPark] = React.useState(false);
+
   const { user } = useContext(UserContext);
 
   const [time, setTime] = React.useState(new Date(Date.now()).toUTCString());
 
   // when the user clicks on the map, add the coordinates into the markers array
-  const handleClick = ({ lngLat: [longitude, latitude], target }) => { // the parameter is the PointerEvent in react-map-gl
+  const handleClick = ({ lngLat: [longitude, latitude], target, feature }) => { // the parameter is the PointerEvent in react-map-gl
     console.log('target.className', target.className);
     if (target.className !== 'mapboxgl-ctrl-geocoder--input' && shouldAddPin) { // as long as the user is not clicking in the search box
       // console.log(`clicked, longitude: ${longitude}, latitude: ${latitude}`);
@@ -124,10 +156,38 @@ const MapComponent = () => {
         headers: { 'content-type': 'application/json', 'Accept': 'application/json' }
       });
     }
+    if (target.className !== 'mapboxgl-ctrl-geocoder--input' && shouldAddPark) { // as long as the user is not clicking in the search box
+      // console.log(`clicked, longitude: ${longitude}, latitude: ${latitude}`);
+      setMarkers2(markers2 => [...markers2, { latitude, longitude }]); // add a marker at the location
+      // markerss = marker2;
+      // console.log('markers: ', markers);
+      // setShouldAddPin(shouldAddPin => !shouldAddPin);
+      setShouldAddPark(shouldAddPark => !shouldAddPark);
+      
+      let utcDate = new Date(new Date().toUTCString());
+      let utcDateAdd10Min = new Date(utcDate.getTime());
+      setTime(time => {
+        return utcDateAdd10Min.toLocaleTimeString('en-US'); // this will set time to be the current time + 10 minutes, format example: 5:20:08 PM
+      });
+
+      // send the coordinates and user id to the backend
+      fetch('/api/countdown', {
+        method: 'POST',
+        body: JSON.stringify({
+          longitude,
+          latitude,
+          user_id: user.id,
+        }),
+        headers: { 'content-type': 'application/json', 'Accept': 'application/json' }
+      });
+    }
 
     // if the user clicks on the add pin button, toggle the state for shouldAddPin
     if (target.id === 'add_pin') {
       setShouldAddPin(shouldAddPin => !shouldAddPin);
+    }
+    if (target.id === 'add_park') {
+      setShouldAddPark(shouldAddPark => !shouldAddPark);
     }
   };
 
@@ -149,6 +209,41 @@ const MapComponent = () => {
     logDragEvent('onDragEnd', event);
     setMarkers(markers => [...markers, { latitude, longitude }]);
   };
+
+  // const newArr = []
+  // for (let i = 0; i < markers.length; i++) {
+  //   if (markers[i].feature === 'Add Pin') {
+  //     newArr.push(<Marker // this JSX element is imported from MapBox that will mark different locations on the map
+  //     key={i}
+  //     latitude={park.latitude}
+  //     longitude={park.longitude}
+  //     feature={park.feature}
+  //   >
+  //     <button className="marker-btn" onClick={(e) => {
+  //       e.preventDefault();
+  //       console.log('clicked: ', park);
+  //       setSelectedPark(park); // when the map pin button is clicked, we will set the state of selectedPark to be the current park the user clicked
+  //     }}>
+  //       <img src={marker} style={{ backgroundColor: 'transparent' }} width="15" height="20" />
+  //     </button>
+  //   </Marker>)
+  //   } else if (markers[i].feature === 'Add Park') {
+  //     newArr.push(<Marker // this JSX element is imported from MapBox that will mark different locations on the map
+  //     key={i}
+  //     latitude={park.latitude}
+  //     longitude={park.longitude}
+  //     feature={park.feature}
+  //   >
+  //     <button className="marker-btn" onClick={(e) => {
+  //       e.preventDefault();
+  //       console.log('clicked: ', park);
+  //       setSelectedPark(park); // when the map pin button is clicked, we will set the state of selectedPark to be the current park the user clicked
+  //     }}>
+  //       <img src={marker} style={{ backgroundColor: 'transparent' }} width="15" height="20" />
+  //     </button>
+  //   </Marker>)
+  //   }
+  // }
 
   return (
     <div style={{ margin: '-2vw', textAlign: 'left' }}>
@@ -178,12 +273,13 @@ const MapComponent = () => {
             trackUserLocation={true}
             showUserLocation={true}
           />
-
+          {/* {newArr} */}
           {markers.map((park, i) => ( // map the array of parking spots
             <Marker // this JSX element is imported from MapBox that will mark different locations on the map
               key={i}
               latitude={park.latitude}
               longitude={park.longitude}
+              feature={park.feature}
               draggable={true}
             // onDragStart={onMarkerDragStart}
             // onDrag={onMarkerDrag}
@@ -199,7 +295,28 @@ const MapComponent = () => {
             </Marker>
           ))}
 
-          {mongoParkingSpots.map(park => ( // map the MongoDB array of parking spots
+        {markers2.map((park, i) => ( // map the array of parking spots
+            <Marker // this JSX element is imported from MapBox that will mark different locations on the map
+              key={i}
+              latitude={park.latitude}
+              longitude={park.longitude}
+              feature={park.feature}
+              draggable={true}
+            // onDragStart={onMarkerDragStart}
+            // onDrag={onMarkerDrag}
+              onDragEnd={onMarkerDragEnd}
+            >
+              <button className="marker-btn2" onClick={(e) => {
+                e.preventDefault();
+                console.log('clicked: ', park);
+                setSelectedPark(park); // when the map pin button is clicked, we will set the state of selectedPark to be the current park the user clicked
+              }}>
+                <img src={marker2} style={{ backgroundColor: 'transparent' }} width="15" height="20" />
+              </button>
+            </Marker>
+          ))}
+
+          {/* {mongoParkingSpots.map(park => ( // map the MongoDB array of parking spots
             <Marker // this JSX element is imported from MapBox that will mark different locations on the map
               key={park.user_ID} // each parking spot should have a unique key of who were in the spot
               latitude={park.latitude}
@@ -213,7 +330,7 @@ const MapComponent = () => {
                 <img src={marker} style={{ backgroundColor: 'transparent' }} width="15" height="20" />
               </button>
             </Marker>
-          ))}
+          ))} */}
 
           {selectedPark ? ( // ternary operator: if there is a selectedPark, show a popup window
             <Popup
@@ -236,6 +353,10 @@ const MapComponent = () => {
           ) : null}
           <button id="add_pin" style={{ position: 'absolute', bottom: '15vh', left: '4vw', height: '45px', width: '85px', borderRadius: '2vw', fontSize: '15px', background: '#2B7BF0', color: 'white' }}>
             + Add pin
+          </button>
+
+          <button id="add_park" style={{ position: 'absolute', bottom: '20vh', left: '4vw', height: '45px', width: '85px', borderRadius: '2vw', fontSize: '15px', background: '#2B7BF0', color: 'white' }}>
+            + Add park
           </button>
 
         </ReactMapGL>
