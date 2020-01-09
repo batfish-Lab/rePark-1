@@ -163,10 +163,6 @@ const MapComponent = () => {
 
     let existingIds = markers2.map(marker => marker.userId)
     const user_id = document.cookie.split("\"")[1];
-    console.log('user_id', user_id);
-    console.log('existingIds', existingIds);
-    console.log('user_id', user_id);
-    console.log(existingIds.includes(user_id));
     if (target.className !== 'mapboxgl-ctrl-geocoder--input' && shouldAddPark && !existingIds.includes(user_id)) { // as long as the user is not clicking in the search box
       // console.log(`clicked, longitude: ${longitude}, latitude: ${latitude}`);
       setMarkers2(markers2 => [...markers2, { latitude, longitude }]); // add a marker at the location
