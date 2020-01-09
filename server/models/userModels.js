@@ -26,12 +26,29 @@ const parkingSchema = new Schema({
       ref: 'user'
     },
     username: String,
+    feature: { type: String, default: 'Add Pin' }
   }
 });
 
 const Parking = mongoose.model('parking', parkingSchema);
 
+const countDownSchema = new Schema({
+  spot: {
+    coordinate: { type: [Number, Number], required: true},
+    available_time: { type: Date, default: Date.now},
+    user_id: {
+      type: Schema.Types.ObjectId,
+      ref:'user'
+    },
+    username: String,
+    feature: { type: String, default: 'Add Park' }
+  }
+});
+
+const CountDown = mongoose.model('countdown', countDownSchema);
+
 module.exports = {
   User,
-  Parking
+  Parking,
+  CountDown
 };

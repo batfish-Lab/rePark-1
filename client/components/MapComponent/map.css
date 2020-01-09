@@ -11,6 +11,11 @@
   border-color: transparent;
 }
 
+.marker-btn2 {
+  background-color: transparent;
+  border-color: transparent;
+}
+
 .mapboxgl-ctrl-geocoder {
   font-size: 18px;
   line-height: 24px;
