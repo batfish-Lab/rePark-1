@@ -88,10 +88,11 @@ app.get('/index', sessionController.isLoggedIn,
 
 app.post('/api/parking', (req, res) => {
   const { longitude, latitude } = req.body;
-  const user_id = mongoose.Types.ObjectId(req.cookies.ssid);
-  console.log(typeof user_id);
+  const user_id = req.cookies.ssid;
+  console.log('user_id', user_id);
 
   User.findById(user_id, function(err, doc) {
+    console.log('user', doc);
     Parking.create({
       spot: {
         coordinate: [longitude, latitude],
