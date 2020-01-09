@@ -49,19 +49,6 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-
-// app.get('/api/username', (req, res) => {
-//   const user_id = req.cookies.ssid;
-//
-//   User.findById(user_id, function(err, doc) {
-//     if (err) {
-//       console.log(`error in getting username: ${err}`);
-//     } else {
-//       res.json(doc)
-//     }
-//   })
-// })
-
 app.get('/api/parking', (req, res) => {
   Parking.find({})
     .exec()
