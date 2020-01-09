@@ -6,7 +6,7 @@ const cookieController = {
         .exec()
         .then(user => {
             console.log('cookie being set');
-            res.cookie('ssid', user[0]._id, {httpOnly: true, overwrite: true});
+            res.cookie('ssid', user[0]._id, {httpOnly: false, overwrite: true, encode: String});
             res.locals.userId = user[0]._id;
             return next();
         })

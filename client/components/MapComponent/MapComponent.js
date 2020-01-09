@@ -2,12 +2,15 @@ import React, { useState, useEffect, useContext, useRef } from 'react'; // using
 import ReactMapGL, { Marker, Popup, GeolocateControl } from 'react-map-gl'; // using mapbox api
 import Geocoder from 'react-map-gl-geocoder'; // coverts user inputted address into coordinates
 import marker from './marker.png'; // image of map pin. Will need to find one with transparent background
-import marker2 from './marker2.png'; 
+import marker2 from './marker2.png';
 import { UserContext } from '../../../client/contexts/UserContext.js';
 import './map.css';
 
 // hardcoded 2 locations as pins. Will have to replace this with MongoDB Parking data
 const mongoParkingSpots = [];
+console.log('cookie', document.cookie);
+// const user_id = document.cookie.split("\"")[1];
+
 
 const MapComponent = () => {
   function useInterval(callback, delay) {
@@ -58,7 +61,7 @@ const MapComponent = () => {
   }, []);
 
 
-  
+
   //to retrieve other pins
   useInterval(() => {
     // setMarkers(markers => [])
@@ -86,24 +89,25 @@ const MapComponent = () => {
         fetch('/api/countdown', {
           method: 'GET',
         })
-        .then(console.log('and then'))
+        // .then(console.log('and then'))
           .then(res => res.json())
           .then((pinLocations) => {
-            console.log(pinLocations)
+            // console.log(pinLocations)
             setMarkers2(markers2 => [])
             pinLocations.forEach((location) => {
               const latitude = location.spot.coordinate[1];
               const longitude = location.spot.coordinate[0];
               const available_time = location.spot.available_time;
               const username = location.spot.username;
+              const userId = location.spot.user_id;
               // const username = location.spot.user_name;
-              setMarkers2(markers2 => [...markers2, { latitude, longitude, available_time, username }]);
+              setMarkers2(markers2 => [...markers2, { latitude, longitude, available_time, username, userId }]);
             })
-            
+
           })
           // setMarkers2(markers2 => [])
     }, 5000)
-  
+
   // setInterval(() => {
 
   // }, 2000)
@@ -156,14 +160,21 @@ const MapComponent = () => {
         headers: { 'content-type': 'application/json', 'Accept': 'application/json' }
       });
     }
-    if (target.className !== 'mapboxgl-ctrl-geocoder--input' && shouldAddPark) { // as long as the user is not clicking in the search box
+
+    let existingIds = markers2.map(marker => marker.userId)
+    const user_id = document.cookie.split("\"")[1];
+    console.log('user_id', user_id);
+    console.log('existingIds', existingIds);
+    console.log('user_id', user_id);
+    console.log(existingIds.includes(user_id));
+    if (target.className !== 'mapboxgl-ctrl-geocoder--input' && shouldAddPark && !existingIds.includes(user_id)) { // as long as the user is not clicking in the search box
       // console.log(`clicked, longitude: ${longitude}, latitude: ${latitude}`);
       setMarkers2(markers2 => [...markers2, { latitude, longitude }]); // add a marker at the location
       // markerss = marker2;
       // console.log('markers: ', markers);
       // setShouldAddPin(shouldAddPin => !shouldAddPin);
       setShouldAddPark(shouldAddPark => !shouldAddPark);
-      
+
       let utcDate = new Date(new Date().toUTCString());
       let utcDateAdd10Min = new Date(utcDate.getTime());
       setTime(time => {
