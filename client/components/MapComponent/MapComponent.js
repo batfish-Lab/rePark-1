@@ -6,15 +6,12 @@ import marker2 from './marker2.png';
 import { UserContext } from '../../../client/contexts/UserContext.js';
 import './map.css';
 
-<<<<<<< HEAD
-=======
 // hardcoded 2 locations as pins. Will have to replace this with MongoDB Parking data
 const mongoParkingSpots = [];
 console.log('cookie', document.cookie);
 // const user_id = document.cookie.split("\"")[1];
 
 
->>>>>>> 4a829f225620b07866aa9b785c20e4ac4d796def
 const MapComponent = () => {
   function useInterval(callback, delay) {
     const savedCallback = useRef();
@@ -143,7 +140,7 @@ const MapComponent = () => {
   const [currTime, setCurrTime] = React.useState(null);
 
   // when the user clicks on the map, add the coordinates into the markers array
-  const handleClick = ({ lngLat: [longitude, latitude], target, feature }) => { // the parameter is the PointerEvent in react-map-gl
+  const handleClick = ({ lngLat: [longitude, latitude], target }) => { // the parameter is the PointerEvent in react-map-gl
     console.log('target.className', target.className);
     if (target.className !== 'mapboxgl-ctrl-geocoder--input' && shouldAddPin) { // as long as the user is not clicking in the search box
       // console.log(`clicked, longitude: ${longitude}, latitude: ${latitude}`);
@@ -171,6 +168,26 @@ const MapComponent = () => {
         headers: { 'content-type': 'application/json', 'Accept': 'application/json' }
       });
 
+      const addMinToDate = (date, min) => {
+        console.log('inside add min to date: ', date.getTime())
+        return new Date(date.getTime() + min * 60000)
+      }
+      const currentTime = new Date()
+      const add5Min = addMinToDate(currentTime, 3)
+      
+      const setTimeExpire = setInterval(function() {
+        const now = new Date().getTime();
+        let time = add5Min - now;
+        // const days = Math.floor(time / (1000 * 60 * 60 * 24)); 
+        const hours = Math.floor((time %(1000 * 60 * 60 * 24))/(1000 * 60 * 60)); 
+        const minutes = Math.floor((time % (1000 * 60 * 60)) / (1000 * 60)); 
+        const seconds = Math.floor((time % (1000 * 60)) / 1000); 
+        document.getElementById("timer").innerHTML ="Available In: " + hours + "h " + minutes + "m " + seconds + "s "; 
+        if (time < 0) { 
+          clearInterval(setTimeExpire); 
+          document.getElementById("timer").innerText = "TIME EXPIRED"; 
+       } 
+      }, 1000);
     }
 
     let existingIds = markers2.map(marker => marker.userId)
@@ -198,27 +215,27 @@ const MapComponent = () => {
         headers: { 'content-type': 'application/json', 'Accept': 'application/json' }
       });
 
-      const addMinToDate = (date, min) => {
-        console.log('inside add min to date: ', date.getTime())
-        return new Date(date.getTime() + min * 60000)
-      }
-      const currentTime = new Date()
-      const add5Min = addMinToDate(currentTime, 3)
+      // const addMinToDate = (date, min) => {
+      //   console.log('inside add min to date: ', date.getTime())
+      //   return new Date(date.getTime() + min * 60000)
+      // }
+      // const currentTime = new Date()
+      // const add5Min = addMinToDate(currentTime, 3)
       
-      const setTimeExpire = setInterval(function() {
-        const now = new Date().getTime();
-        let time = add5Min - now;
-        const days = Math.floor(time / (1000 * 60 * 60 * 24)); 
-        const hours = Math.floor((time %(1000 * 60 * 60 * 24))/(1000 * 60 * 60)); 
-        const minutes = Math.floor((time % (1000 * 60 * 60)) / (1000 * 60)); 
-        const seconds = Math.floor((time % (1000 * 60)) / 1000); 
-        document.getElementById("timer").innerHTML = days + "d "  
-        + hours + "h " + minutes + "m " + seconds + "s "; 
-        if (time < 0) { 
-          clearInterval(setTimeExpire); 
-          document.getElementById("timer").innerText = "TIME EXPIRED"; 
-       } 
-      }, 1000);
+      // const setTimeExpire = setInterval(function() {
+      //   const now = new Date().getTime();
+      //   let time = add5Min - now;
+      //   const days = Math.floor(time / (1000 * 60 * 60 * 24)); 
+      //   const hours = Math.floor((time %(1000 * 60 * 60 * 24))/(1000 * 60 * 60)); 
+      //   const minutes = Math.floor((time % (1000 * 60 * 60)) / (1000 * 60)); 
+      //   const seconds = Math.floor((time % (1000 * 60)) / 1000); 
+      //   document.getElementById("timer").innerHTML = days + "d "  
+      //   + hours + "h " + minutes + "m " + seconds + "s "; 
+      //   if (time < 0) { 
+      //     clearInterval(setTimeExpire); 
+      //     document.getElementById("timer").innerText = "TIME EXPIRED"; 
+      //  } 
+      // }, 1000);
     }
     // if the user clicks on the add pin button, toggle the state for shouldAddPin
     if (target.id === 'add_pin') {
@@ -229,24 +246,25 @@ const MapComponent = () => {
     }
   };
 
-  const [events, setEvents] = React.useState({});
 
-  const logDragEvent = (name, event) => {
-    setEvents(events => { [...events, { [name]: lngLat }] });
-  };
+  // const [events, setEvents] = React.useState({});
 
-  const onMarkerDragStart = ({ lngLat: [lng, lat] }) => {
-    logDragEvent('onDragStart', event);
-  };
+  // const logDragEvent = (name, event) => {
+  //   setEvents(events => { [...events, { [name]: lngLat }] });
+  // };
 
-  const onMarkerDrag = ({ lngLat: [lng, lat] }) => {
-    logDragEvent('onDrag', event);
-  };
+  // const onMarkerDragStart = ({ lngLat: [lng, lat] }) => {
+  //   logDragEvent('onDragStart', event);
+  // };
 
-  const onMarkerDragEnd = ({ lngLat: [lng, lat] }) => {
-    logDragEvent('onDragEnd', event);
-    setMarkers(markers => [...markers, { latitude, longitude }]);
-  };
+  // const onMarkerDrag = ({ lngLat: [lng, lat] }) => {
+  //   logDragEvent('onDrag', event);
+  // };
+
+  // const onMarkerDragEnd = ({ lngLat: [lng, lat] }) => {
+  //   logDragEvent('onDragEnd', event);
+  //   setMarkers(markers => [...markers, { latitude, longitude }]);
+  // };
 
   // const newArr = []
   // for (let i = 0; i < markers.length; i++) {
@@ -319,17 +337,17 @@ const MapComponent = () => {
               latitude={park.latitude}
               longitude={park.longitude}
               feature={park.feature}
-              draggable={true}
+              // draggable={true}
             // onDragStart={onMarkerDragStart}
             // onDrag={onMarkerDrag}
-              onDragEnd={onMarkerDragEnd}
+              // onDragEnd={onMarkerDragEnd}
             >
               <button className="marker-btn" onClick={(e) => {
                 e.preventDefault();
                 console.log('clicked: ', park);
                 setSelectedPin(park); // when the map pin button is clicked, we will set the state of selectedPark to be the current park the user clicked
               }}>
-                <img src={marker} style={{ backgroundColor: 'transparent' }} width="15" height="20" />
+                <img src={marker} style={{ backgroundColor: 'transparent' }} width="23" height="31" />
               </button>
             </Marker>
           ))}
@@ -340,17 +358,17 @@ const MapComponent = () => {
               latitude={park.latitude}
               longitude={park.longitude}
               feature={park.feature}
-              draggable={true}
+              // draggable={true}
             // onDragStart={onMarkerDragStart}
             // onDrag={onMarkerDrag}
-              onDragEnd={onMarkerDragEnd}
+              // onDragEnd={onMarkerDragEnd}
             >
               <button className="marker-btn2" onClick={(e) => {
                 e.preventDefault();
                 console.log('clicked: ', park);
                 setSelectedPark(park); // when the map pin button is clicked, we will set the state of selectedPark to be the current park the user clicked
               }}>
-                <img src={marker2} style={{ backgroundColor: 'transparent' }} width="15" height="20" />
+                <img src={marker2} style={{ backgroundColor: 'transparent' }} width="23" height="31" />
               </button>
             </Marker>
           ))}
@@ -378,15 +396,14 @@ const MapComponent = () => {
                 setSelectedPin(null); // set the state of selectedPark back to null
               }}
             >
-              <div style={{ textAlign: 'left', width: '250px', height: '100px' }}>
+              <div style={{ textAlign: 'left', width: '225px', height: '100px' }}>
                 {/* Who parked here: {selectedPark.user_name || user.name}<br >*/}
                 {/*Available today at: {time}<br />*/}
                 {/*Parking coordinates: {selectedPark.latitude}, {selectedPark.longitude}*/}
-                Who parked here: {selectedPin.username || user.name}<br />
-                Available today at: {selectedPin.available_time}<br />
-                {console.log('selectedPin', selectedPin)}
-                Parking coordinates: {selectedPin.latitude}, {selectedPin.longitude}
+                Who parked here: {selectedPin.username || user.name}<br /><br></br>
+                Parked at: <br></br>{selectedPin.available_time}<br /><br></br>
                 <div id={selectedPin.username}></div>
+                <div id='timer'></div>
               </div>
             </Popup>
           ) : null}
@@ -399,18 +416,19 @@ const MapComponent = () => {
                 setSelectedPark(null); // set the state of selectedPark back to null
               }}
             >
-              <div style={{ textAlign: 'left', width: '250px', height: '100px' }}>
+              <div style={{ textAlign: 'left', width: '225px', height: '100px' }}>
                 {/* Who parked here: {selectedPark.user_name || user.name}<br >*/}
                 {/*Available today at: {time}<br />*/}
                 {/*Parking coordinates: {selectedPark.latitude}, {selectedPark.longitude}*/}
-                Who parked here: {selectedPark.username || user.name}<br />
-                Available today at: {selectedPark.available_time}<br />
-                {console.log('selectedPark', selectedPark)}
-                Parking coordinates: {selectedPark.latitude}, {selectedPark.longitude}
-                <div id='timer'></div>
+                Who parked here: {selectedPark.username || user.name}<br /><br></br>
+                Time parked: <br></br>{selectedPark.available_time}<br />
+      
+                {/* {console.log('selectedPark', selectedPark)} */}
+                {/* Parking coordinates: {selectedPark.latitude}, {selectedPark.longitude} */}
+                {/* <div id='timer'></div>
                 <div id="timer2">
                   <form>
-                    <select class="txtbx" name="chooseTime">
+                    <select id='txtbx' class="txtbx" name="chooseTime">
                       <option value="" hidden disabled selected>Leaving In...</option>
                       <option value="15">15 Minutes</option>
                       <option value="30">30 Minutes</option>
@@ -423,15 +441,15 @@ const MapComponent = () => {
                     </select> <br></br>
                     <input class="submit" type="submit" value="Submit" />
                   </form>
-                </div>
+                </div> */}
               </div>
             </Popup>
           ) : null}
-          <button id="add_pin" style={{ position: 'absolute', bottom: '15vh', left: '4vw', height: '45px', width: '85px', borderRadius: '2vw', fontSize: '15px', background: '#2B7BF0', color: 'white' }}>
+          <button id="add_pin" style={{ position: 'absolute', bottom: '15vh', left: '4vw', height: '45px', width: '100px', borderRadius: '1vw', fontSize: '15px', background: '#2B7BF0', color: 'white' }}>
             + Add pin
           </button>
 
-          <button id="add_park" style={{ position: 'absolute', bottom: '20vh', left: '4vw', height: '45px', width: '85px', borderRadius: '2vw', fontSize: '15px', background: '#2B7BF0', color: 'white' }}>
+          <button id="add_park" style={{ position: 'absolute', bottom: '25vh', left: '4vw', height: '45px', width: '100px', borderRadius: '1vw', fontSize: '15px', background: '#df8633', color: 'white' }}>
             + Add park
           </button>
 
