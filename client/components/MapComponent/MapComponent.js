@@ -6,9 +6,6 @@ import marker2 from './marker2.png';
 import { UserContext } from '../../../client/contexts/UserContext.js';
 import './map.css';
 
-// hardcoded 2 locations as pins. Will have to replace this with MongoDB Parking data
-const mongoParkingSpots = [];
-
 const MapComponent = () => {
   function useInterval(callback, delay) {
     const savedCallback = useRef();
@@ -39,6 +36,8 @@ const MapComponent = () => {
   });
 
   // selectedPark is a state variable that contains which map pin the user has clicked
+  const [selectedPin, setSelectedPin] = useState(null);
+
   const [selectedPark, setSelectedPark] = useState(null);
 
   const [markers, setMarkers] = React.useState([]);
@@ -120,6 +119,9 @@ const MapComponent = () => {
     });
   }
 
+
+
+
   // markers array is the state variable that will be populated with each individual marker object
 
   const [shouldAddPin, setShouldAddPin] = React.useState(false);
@@ -128,7 +130,7 @@ const MapComponent = () => {
 
   const { user } = useContext(UserContext);
 
-  const [time, setTime] = React.useState(new Date(Date.now()).toUTCString());
+  const [currTime, setCurrTime] = React.useState(null);
 
   // when the user clicks on the map, add the coordinates into the markers array
   const handleClick = ({ lngLat: [longitude, latitude], target, feature }) => { // the parameter is the PointerEvent in react-map-gl
@@ -139,10 +141,13 @@ const MapComponent = () => {
       // console.log('markers: ', markers);
       setShouldAddPin(shouldAddPin => !shouldAddPin);
 
-      let utcDate = new Date(new Date().toUTCString());
-      let utcDateAdd10Min = new Date(utcDate.getTime());
-      setTime(time => {
-        return utcDateAdd10Min.toLocaleTimeString('en-US'); // this will set time to be the current time + 10 minutes, format example: 5:20:08 PM
+      let utcDate = new Date().getTime()
+      // console.log('utcDate', utcDate)
+      // let utcDateAdd10Min = new Date(utcDate.getTime());
+      setCurrTime(currTime => {
+        return utcDate
+        // console.log('inside should add pin sset curr time: ', utcDate.toLocaleTimeString('en-US'))
+        // return utcDate.toLocaleTimeString('en-US'); // this will set time to be the current time + 10 minutes, format example: 5:20:08 PM
       });
 
       // send the coordinates and user id to the backend
@@ -156,11 +161,36 @@ const MapComponent = () => {
         headers: { 'content-type': 'application/json', 'Accept': 'application/json' }
       });
 
+    }
+    if (target.className !== 'mapboxgl-ctrl-geocoder--input' && shouldAddPark) { // as long as the user is not clicking in the search box
+      // console.log(`clicked, longitude: ${longitude}, latitude: ${latitude}`);
+      setMarkers2(markers2 => [...markers2, { latitude, longitude }]); // add a marker at the location
+      // setShouldAddPin(shouldAddPin => !shouldAddPin);
+      setShouldAddPark(shouldAddPark => !shouldAddPark);
+      
+      let utcDate = new Date(new Date().toUTCString());
+      // let utcDateAdd10Min = new Date(utcDate.getTime());
+      setCurrTime(currTime => {
+        // console.log('inside should add park sset curr time: ', utcDate.toLocaleTimeString('en-US'))
+        return utcDate.toLocaleTimeString('en-US'); // this will set time to be the current time + 10 minutes, format example: 5:20:08 PM
+      });
+      // send the coordinates and user id to the backend
+      fetch('/api/countdown', {
+        method: 'POST',
+        body: JSON.stringify({
+          longitude,
+          latitude,
+          user_id: user.id,
+        }),
+        headers: { 'content-type': 'application/json', 'Accept': 'application/json' }
+      });
+
       const addMinToDate = (date, min) => {
+        console.log('inside add min to date: ', date.getTime())
         return new Date(date.getTime() + min * 60000)
       }
       const currentTime = new Date()
-      const add5Min = addMinToDate(currentTime, 1)
+      const add5Min = addMinToDate(currentTime, 3)
       
       const setTimeExpire = setInterval(function() {
         const now = new Date().getTime();
@@ -172,37 +202,11 @@ const MapComponent = () => {
         document.getElementById("timer").innerHTML = days + "d "  
         + hours + "h " + minutes + "m " + seconds + "s "; 
         if (time < 0) { 
-            clearInterval(setTimeExpire); 
-            document.createElement("timer").innerHTML('TIME EXPIRED')
-        } 
+          clearInterval(setTimeExpire); 
+          document.getElementById("timer").innerText = "TIME EXPIRED"; 
+       } 
       }, 1000);
     }
-    if (target.className !== 'mapboxgl-ctrl-geocoder--input' && shouldAddPark) { // as long as the user is not clicking in the search box
-      // console.log(`clicked, longitude: ${longitude}, latitude: ${latitude}`);
-      setMarkers2(markers2 => [...markers2, { latitude, longitude }]); // add a marker at the location
-      // markerss = marker2;
-      // console.log('markers: ', markers);
-      // setShouldAddPin(shouldAddPin => !shouldAddPin);
-      setShouldAddPark(shouldAddPark => !shouldAddPark);
-      
-      let utcDate = new Date(new Date().toUTCString());
-      let utcDateAdd10Min = new Date(utcDate.getTime());
-      setTime(time => {
-        return utcDateAdd10Min.toLocaleTimeString('en-US'); // this will set time to be the current time + 10 minutes, format example: 5:20:08 PM
-      });
-
-      // send the coordinates and user id to the backend
-      fetch('/api/countdown', {
-        method: 'POST',
-        body: JSON.stringify({
-          longitude,
-          latitude,
-          user_id: user.id,
-        }),
-        headers: { 'content-type': 'application/json', 'Accept': 'application/json' }
-      });
-    }
-
     // if the user clicks on the add pin button, toggle the state for shouldAddPin
     if (target.id === 'add_pin') {
       setShouldAddPin(shouldAddPin => !shouldAddPin);
@@ -310,7 +314,7 @@ const MapComponent = () => {
               <button className="marker-btn" onClick={(e) => {
                 e.preventDefault();
                 console.log('clicked: ', park);
-                setSelectedPark(park); // when the map pin button is clicked, we will set the state of selectedPark to be the current park the user clicked
+                setSelectedPin(park); // when the map pin button is clicked, we will set the state of selectedPark to be the current park the user clicked
               }}>
                 <img src={marker} style={{ backgroundColor: 'transparent' }} width="15" height="20" />
               </button>
@@ -353,6 +357,26 @@ const MapComponent = () => {
               </button>
             </Marker>
           ))} */}
+          {selectedPin ? ( // ternary operator: if there is a selectedPark, show a popup window
+            <Popup
+              latitude={selectedPin.latitude}
+              longitude={selectedPin.longitude}
+              onClose={() => { // when the x on the top right of the pop up is clicked
+                setSelectedPin(null); // set the state of selectedPark back to null
+              }}
+            >
+              <div style={{ textAlign: 'left', width: '250px', height: '100px' }}>
+                {/* Who parked here: {selectedPark.user_name || user.name}<br >*/}
+                {/*Available today at: {time}<br />*/}
+                {/*Parking coordinates: {selectedPark.latitude}, {selectedPark.longitude}*/}
+                Who parked here: {selectedPin.username || user.name}<br />
+                Available today at: {selectedPin.available_time}<br />
+                {console.log('selectedPin', selectedPin)}
+                Parking coordinates: {selectedPin.latitude}, {selectedPin.longitude}
+                <div id={selectedPin.username}></div>
+              </div>
+            </Popup>
+          ) : null}
 
           {selectedPark ? ( // ternary operator: if there is a selectedPark, show a popup window
             <Popup
@@ -371,6 +395,22 @@ const MapComponent = () => {
                 {console.log('selectedPark', selectedPark)}
                 Parking coordinates: {selectedPark.latitude}, {selectedPark.longitude}
                 <div id='timer'></div>
+                <div id="timer2">
+                  <form>
+                    <select class="txtbx" name="chooseTime">
+                      <option value="" hidden disabled selected>Leaving In...</option>
+                      <option value="15">15 Minutes</option>
+                      <option value="30">30 Minutes</option>
+                      <option value="1">1 Hour</option>
+                      <option value="2">2 Hours</option>
+                      <option value="3">3 Hours</option>
+                      <option value="4">4 Hours</option>
+                      <option value="5">5 Hours</option>
+                      <option value="plus">5+ Hours</option>
+                    </select> <br></br>
+                    <input class="submit" type="submit" value="Submit" />
+                  </form>
+                </div>
               </div>
             </Popup>
           ) : null}
