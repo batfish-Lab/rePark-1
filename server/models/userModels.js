@@ -20,7 +20,7 @@ const User = mongoose.model('User', userSchema);
 const parkingSchema = new Schema({
   spot: {
     coordinate: { type: [Number, Number], required: true },
-    available_time: { type: Date, expires: 120, default: Date.now },
+    available_time: { type: Date, expires: 180, default: new Date() },
     user_id: {
       type: Schema.Types.ObjectId,
       ref: 'user'
@@ -35,7 +35,7 @@ const Parking = mongoose.model('parking', parkingSchema);
 const countDownSchema = new Schema({
   spot: {
     coordinate: { type: [Number, Number], required: true},
-    available_time: { type: Date, default: Date.now},
+    available_time: { type: Date, default: new Date()},
     user_id: {
       type: Schema.Types.ObjectId,
       ref:'user'
